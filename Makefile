@@ -1,12 +1,14 @@
-compile:
-	gcc main.c dist/my-functions.o -o dist/main 
-link:dist dist/main.o, dist/functions.o
-	gcc dist/main.o dist/functions.o -o dist/main 
+#compile:
+#	gcc main.c dist/functions.o -o dist/main 
+default: link
 
-dist/main.o: main.c
-	gcc main.c -o dist/main.o
-	
-dist/functions.o: lib/functions.c
-	gcc -c lib/functions.c -o dist/functions.o
+link: bin/main.o bin/functions.o
+	gcc bin/main.o bin/functions.o -o bin/main 
+
+bin/main.o: main.c
+	gcc main.c -o bin/main.o
+
+bin/functions.o: lib/functions.c
+	gcc -c lib/functions.c -o bin/functions.o
 clean:
-	rm -rf ./dist && mkdir ./dist
+	rm -rf ./bin && mkdir ./bin
