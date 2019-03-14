@@ -12,16 +12,15 @@
 #define SYS_BITS 16
 
 typedef enum {
+    false,
+    true } bool;
+typedef enum {
     LOW_ORDER_MASK,
     HIGH_ORDER_MASK
 } mask_type;
-typedef unsigned char  bit_t;
-typedef unsigned short addr_t;
-
-addr_t create_mask(bit_t, mask_type);
-
-//declare functions
+void set_up_memory();
 int calculateBitsRequired(void);
+
 
 #endif 
 
