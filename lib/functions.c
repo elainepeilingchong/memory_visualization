@@ -7,7 +7,7 @@ int calculateBitsRequired()
     int pageSizeBit = (int)(log((double)PAGE_SIZE) / log((double)2));
     return SYS_BITS - pageSizeBit;
 }
-void set_up_memory()
+char *set_up_memory()
 {
     int noOfFrame = 0;
     int VPNBits = calculateBitsRequired();
@@ -33,7 +33,7 @@ void set_up_memory()
     int increment_page_table_entry = 0;
     for (int i = 0; i < ADDEESSABLE_MEMORY; i++)
     {
-        if (i % noOfPages == 0 && i>=PAGE_SIZE)
+        if (i % noOfPages == 0 && i >= PAGE_SIZE)
         {
             noOfFrame++;
         }
@@ -54,22 +54,27 @@ void set_up_memory()
             }
         }
     }
-    noOfFrame=0;
+    noOfFrame = 0;
     for (int i = 0; i < ADDEESSABLE_MEMORY; i++)
     {
-       if (i % noOfPages == 0 && i>=PAGE_SIZE)
+        if (i % noOfPages == 0 && i >= PAGE_SIZE)
         {
             noOfFrame++;
         }
-        if(i<512){
-            // unsigned short page_table_entry = addresses[i] << 8;
-            // page_table_entry |= addresses[i+256];
+        if (i < 512)
+        {
+
             fprintf(ofMemory, "0x%04X\t|%d\t|0x%x\n", i, noOfFrame, addresses[i]);
-        }else{
-            if(addresses[i]==NULL){
-            fprintf(ofMemory, "0x%04X\t|%d\t|-\n", i, noOfFrame);
-            }else{
-            fprintf(ofMemory, "0x%04X\t|%d\t|%c\n", i, noOfFrame, addresses[i]);
+        }
+        else
+        {
+            if (addresses[i] == NULL)
+            {
+                fprintf(ofMemory, "0x%04X\t|%d\t|-\n", i, noOfFrame);
+            }
+            else
+            {
+                fprintf(ofMemory, "0x%04X\t|%d\t|%c\n", i, noOfFrame, addresses[i]);
             }
         }
     }
@@ -81,4 +86,40 @@ void set_up_memory()
     fclose(ofPage);
     fclose(ofMemory);
     printf("Your system is ready!\n");
+    return addresses;
+}
+void start_system(char *addresses)
+{
+    unsigned int offset_mask = 0x00FF;
+
+    unsigned int user_input_address;
+    while (true)
+    {
+        printf("Please enter any virtual memory address in hexadecimal form (without 0x):");
+        scanf("%04X", &user_input_address);
+        printf("\n");
+
+        unsigned short offset = user_input_address & offset_mask;
+
+        unsigned int vpn = user_input_address >> 8;
+        unsigned int pfn = addresses[vpn];
+        unsigned int present_bit = addresses[vpn + 256];
+        unsigned short pte = pfn << 8;
+        pte |= present_bit;
+        //extract value
+        if (present_bit == 0x01)
+        {
+            //    reconstruct
+            unsigned int phy_address = pfn << OFFSET_BITS;
+            phy_address |= offset;
+            printf("phy_address %x\n", phy_address);
+        }
+        else
+        {
+            unsigned int dfn = addresses[vpn] >> 8;
+            //page fault exception
+            printf("Page Fault exception!!\n");
+            //swap
+        }
+    }
 }

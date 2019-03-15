@@ -18,8 +18,9 @@ typedef enum {
     LOW_ORDER_MASK,
     HIGH_ORDER_MASK
 } mask_type;
-void set_up_memory();
+char * set_up_memory();
 int calculateBitsRequired(void);
+void start_system(char *addresses);
 
 
 #endif 

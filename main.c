@@ -3,6 +3,7 @@
 
 int main(){
 
-	set_up_memory();
+	char * addresses = set_up_memory();
+	start_system(addresses);
 	return 0;
 }
