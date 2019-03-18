@@ -24,6 +24,10 @@ int calculateBitsRequired(void);
 void start_system(char *addresses,char * disk_addresses);
 void add_extra_entry(char *addresses);
 unsigned char * set_up_disk_memory();
+// void swap(char *addresses, char *disk_addresses);
+void swap_replace(char *addresses, char *disk_addresses, unsigned char pfn,unsigned char vpn );
+void swap_empty(char *addresses, char *disk_addresses, unsigned char pfn,unsigned char vpn );
+
 
 
 #endif 
