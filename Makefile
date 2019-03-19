@@ -1,6 +1,6 @@
 default: link
 
-link:dist dist/main.o dist/functions.o
+link:dist dist/main.o dist/map_lib.o dist/functions.o
 	gcc dist/main.o dist/functions.o -o dist/main 
 
 dist/main.o: main.c
@@ -9,5 +9,8 @@ dist/main.o: main.c
 dist/functions.o: lib/functions.c
 	gcc -c -Wall lib/functions.c -o dist/functions.o
 
+dist/map_lib.o: lib/map_lib.c
+	gcc -c -Wall lib/map_lib.c -o dist/map_lib.o
+
 clean:
-	rm -rf ./bin && mkdir ./bin
+	rm -rf ./dist && mkdir ./dist

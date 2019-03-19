@@ -1,8 +1,12 @@
+// #include "map_lib.h"
 #include "functions.h"
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
+#include <strings.h>
+
 int calculateBitsRequired()
 {
     int pageSizeBit = (int)(log((double)PAGE_SIZE) / log((double)2));
@@ -16,8 +20,6 @@ void output_physical_memory()
 }
 void set_up_physical_memory(unsigned char *addresses)
 {
-    printf("set physical");
-
     int noOfFrame = 0;
     int VPNBits = calculateBitsRequired();
     int offset = SYS_BITS - VPNBits;
@@ -105,6 +107,7 @@ void add_extra_entry(unsigned char *addresses)
     {
         if (addresses[i] == '-')
         {
+            printf("INT %d",i);
             addresses[i] = 0x00;
             addresses[i + 1] = 0x01;
             done = true;
@@ -138,8 +141,9 @@ void set_up_disk_memory(unsigned char *disk_addresses)
         }
     }
 }
-void start_system(unsigned char *addresses, unsigned char *disk_addresses)
+void start_system(unsigned char *addresses, unsigned char *disk_addresses, struct map_t *tlb)
 {
+
     unsigned int offset_mask = 0x00FF;
 
     unsigned int user_input_address;
@@ -148,43 +152,59 @@ void start_system(unsigned char *addresses, unsigned char *disk_addresses)
         printf("Please enter any virtual memory address in hexadecimal form (without 0x):");
         scanf("%04X", &user_input_address);
         printf("\n");
-        unsigned short offset = user_input_address & offset_mask;
-        unsigned char vpn = user_input_address >> 8;
-        unsigned char pfn = addresses[vpn];
-        unsigned int present_bit = addresses[vpn + 256];
-        unsigned short pte = pfn << 8;
-        pte |= present_bit;
+        // convert 123 to string [buf]
+        int length = snprintf(NULL, 0, "%d", user_input_address);
+        char *str = malloc(length + 1);
+        snprintf(str, length + 1, "%d", user_input_address);
+        if (map_get(tlb, str) != "")
+        {
+            printf("FOUND IN TLB\n");
+            int code = atoi(map_get(tlb, str));
+            printf("The data store in the memory is %c  \n", code);
+        }
 
-        if (present_bit == 0x01)
-        {
-            //    reconstruct
-            unsigned int phy_address = pfn << OFFSET_BITS;
-            phy_address |= offset;
-            printf("The data store in the memory is %c\n", addresses[phy_address]);
-        }
-        else if (present_bit == 0x00 && pfn != '-')
-        {
-
-            //page fault exception
-            printf("Page Fault exception!!\n");
-            //swap
-            swap_empty(addresses, disk_addresses, pfn, vpn);
-        }
-        else if (pfn == '-')
-        {
-            printf("There are nothing in this address\n");
-        }
         else
         {
-            printf("Invalid\n");
+            unsigned short offset = user_input_address & offset_mask;
+            unsigned char vpn = user_input_address >> 8;
+            unsigned char pfn = addresses[vpn];
+            unsigned int present_bit = addresses[vpn + 256];
+            unsigned short pte = pfn << 8;
+            pte |= present_bit;
+
+            if (  present_bit == 0x01)
+            {
+                //    reconstruct
+                unsigned int phy_address = pfn << OFFSET_BITS;
+                phy_address |= offset;
+                printf("The data store in the memory is %c\n", addresses[phy_address]);
+                char str2[10];
+                sprintf(str2, "%d", addresses[phy_address]);
+                map_set(tlb, str, str2);
+            }
+            else if (present_bit == 0x00 && pfn != '-')
+            {
+
+                //page fault exception
+                printf("Page Fault exception!!\n");
+                //swap
+                swap_empty(addresses, disk_addresses, pfn, vpn);
+            }
+            else if (pfn == '-')
+            {
+                printf("There are nothing in this address\n");
+            }
+            else
+            {
+                printf("Invalid\n");
+            }
         }
+        free(str);
     }
 }
 
 void swap_replace(unsigned char *addresses, unsigned char *disk_addresses, unsigned char pfn, unsigned char vpn)
 {
-    
-
 }
 void swap_empty(unsigned char *addresses, unsigned char *disk_addresses, unsigned char pfn, unsigned char vpn)
 {
@@ -205,4 +225,67 @@ void swap_empty(unsigned char *addresses, unsigned char *disk_addresses, unsigne
     }
     addresses[vpn] = new_pfn;
     addresses[vpn + 256] = 0x01;
+}
+
+struct map_t *map_create()
+{
+    struct map_t *m;
+    m = (struct map_t *)malloc(sizeof(struct map_t));
+    m->name = NULL;
+    m->value = NULL;
+    m->nxt = NULL;
+    return m;
+}
+
+void map_set(struct map_t *m, char *name, char *value)
+{
+    struct map_t *map;
+
+    if (m->name == NULL)
+    {
+        m->name = (char *)malloc(strlen(name) + 1);
+        strcpy(m->name, name);
+        m->value = (char *)malloc(strlen(value) + 1);
+        strcpy(m->value, value);
+        m->nxt = NULL;
+        return;
+    }
+    for (map = m;; map = map->nxt)
+    {
+        if (!strcasecmp(name, map->name))
+        {
+            if (map->value != NULL)
+            {
+                free(map->value);
+                map->value = (char *)malloc(strlen(value) + 1);
+                strcpy(map->value, value);
+                return;
+            }
+        }
+        if (map->nxt == NULL)
+        {
+            map->nxt = (struct map_t *)malloc(sizeof(struct map_t));
+            map = map->nxt;
+            map->name = (char *)malloc(strlen(name) + 1);
+            strcpy(map->name, name);
+            map->value = (char *)malloc(strlen(value) + 1);
+            strcpy(map->value, value);
+            map->nxt = NULL;
+            return;
+        }
+    }
+}
+
+char *map_get(struct map_t *m, char *name)
+{
+    struct map_t *map;
+    // printf("Size %lu ", sizeof(m));
+    for (map = m; map != NULL && map->name != NULL; map = map->nxt)
+    {
+        if (!strcasecmp(name, map->name))
+        {
+            return map->value;
+        }
+    }
+    return "";
 }
