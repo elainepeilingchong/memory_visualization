@@ -107,11 +107,11 @@ void add_extra_entry(unsigned char *addresses)
     {
         if (addresses[i] == '-')
         {
-            printf("INT %d",i);
+            printf("INT %d", i);
             addresses[i] = 0x00;
             addresses[i + 1] = 0x01;
             done = true;
-            printf("The frame number that save in disk is %02X and %02X\n", i, i + 1);
+            printf("The page number that save in disk is %02X and %02X\n", i, i + 1);
         }
     }
 }
@@ -152,34 +152,42 @@ void start_system(unsigned char *addresses, unsigned char *disk_addresses, struc
         printf("Please enter any virtual memory address in hexadecimal form (without 0x):");
         scanf("%04X", &user_input_address);
         printf("\n");
+
+        unsigned short offset = user_input_address & offset_mask;
+        unsigned char vpn = user_input_address >> 8;
         // convert 123 to string [buf]
+
         int length = snprintf(NULL, 0, "%d", user_input_address);
+
         char *str = malloc(length + 1);
-        snprintf(str, length + 1, "%d", user_input_address);
+        snprintf(str, length + 1, "%d", vpn);
         if (map_get(tlb, str) != "")
         {
             printf("FOUND IN TLB\n");
+            //return frame number
             int code = atoi(map_get(tlb, str));
-            printf("The data store in the memory is %c  \n", code);
+            printf("COde %x\n",code); 
+            unsigned int phy_address = code << OFFSET_BITS;
+            phy_address |= offset;
+            printf("The data store in the memory is %c  \n", addresses[phy_address]);
         }
 
         else
         {
-            unsigned short offset = user_input_address & offset_mask;
-            unsigned char vpn = user_input_address >> 8;
             unsigned char pfn = addresses[vpn];
             unsigned int present_bit = addresses[vpn + 256];
             unsigned short pte = pfn << 8;
             pte |= present_bit;
 
-            if (  present_bit == 0x01)
+            if (present_bit == 0x01)
             {
                 //    reconstruct
                 unsigned int phy_address = pfn << OFFSET_BITS;
                 phy_address |= offset;
                 printf("The data store in the memory is %c\n", addresses[phy_address]);
                 char str2[10];
-                sprintf(str2, "%d", addresses[phy_address]);
+                sprintf(str2, "%d", pfn);
+                // set frame number
                 map_set(tlb, str, str2);
             }
             else if (present_bit == 0x00 && pfn != '-')
