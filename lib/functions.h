@@ -19,14 +19,14 @@ typedef enum {
     LOW_ORDER_MASK,
     HIGH_ORDER_MASK
 } mask_type;
-unsigned char * set_up_physical_memory();
+void set_up_physical_memory(unsigned char *addresses);
 int calculateBitsRequired(void);
-void start_system(char *addresses,char * disk_addresses);
-void add_extra_entry(char *addresses);
-unsigned char * set_up_disk_memory();
+void start_system(unsigned char *addresses,unsigned char *disk_addresses);
+void add_extra_entry(unsigned char *addresses);
+void set_up_disk_memory(unsigned char *disk_addresses);
 // void swap(char *addresses, char *disk_addresses);
-void swap_replace(char *addresses, char *disk_addresses, unsigned char pfn,unsigned char vpn );
-void swap_empty(char *addresses, char *disk_addresses, unsigned char pfn,unsigned char vpn );
+void swap_replace(unsigned char  *addresses, unsigned char *disk_addresses, unsigned char pfn,unsigned char vpn );
+void swap_empty(unsigned char *addresses, unsigned char *disk_addresses, unsigned char pfn,unsigned char vpn );
 
 
 

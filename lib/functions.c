@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <math.h>
 int calculateBitsRequired()
 {
     int pageSizeBit = (int)(log((double)PAGE_SIZE) / log((double)2));
@@ -13,12 +14,13 @@ void output_page_table()
 void output_physical_memory()
 {
 }
-unsigned char *set_up_physical_memory()
+void set_up_physical_memory(unsigned char *addresses)
 {
+    printf("set physical");
+
     int noOfFrame = 0;
     int VPNBits = calculateBitsRequired();
     int offset = SYS_BITS - VPNBits;
-    unsigned char *addresses = malloc(sizeof(char) * PHYSICAL_MEMORY);
     int noOfPages = PHYSICAL_MEMORY / PAGE_SIZE;
     srand(time(NULL));
     int num = (rand() % (MAX_BYTES - MIN_BYTES)) + MIN_BYTES;
@@ -57,6 +59,10 @@ unsigned char *set_up_physical_memory()
                 increment_page_table_entry++;
             }
         }
+        else if (i >= 512)
+        {
+            addresses[i] = '-';
+        }
     }
     for (int y = increment_page_table_entry; y < 256; y++)
     {
@@ -91,36 +97,34 @@ unsigned char *set_up_physical_memory()
     fclose(ofPage);
     fclose(ofMemory);
     printf("Your system is ready!\n");
-    return addresses;
 }
-void add_extra_entry(char *addresses)
+void add_extra_entry(unsigned char *addresses)
 {
     bool done = false;
     for (int i = 0; i < 256 && !done; i++)
     {
         if (addresses[i] == '-')
         {
-            addresses[i] = 0x01;
-            addresses[i + 1] = 0x02;
+            addresses[i] = 0x00;
+            addresses[i + 1] = 0x01;
             done = true;
             printf("The frame number that save in disk is %02X and %02X\n", i, i + 1);
         }
     }
 }
-unsigned char *set_up_disk_memory()
+void set_up_disk_memory(unsigned char *disk_addresses)
 {
     FILE *ofDiskMemory;
-    unsigned char *disk_addresses = malloc(sizeof(char) * DISK_MEMORY);
     char disk_memory[] = "/Users/elainechong/Desktop/201819/Semester2/OP/CA1/memory_visualization/data/disk_memory.txt";
     ofDiskMemory = fopen(disk_memory, "w");
     fprintf(ofDiskMemory, "Address\t|Frame\t|Content\n");
     fprintf(ofDiskMemory, "-------------------------\n");
     for (int i = 0; i < DISK_MEMORY; i++)
     {
+        char c = '-';
         if (i < 512)
         {
-            char c = '-';
-            while (c != '-')
+            while (c == '-')
             {
                 c = (rand() % (126 - 33)) + 33;
             }
@@ -129,12 +133,12 @@ unsigned char *set_up_disk_memory()
         }
         else
         {
-            fprintf(ofDiskMemory, "0x%02X\t|%d\t\t|-\n", i, (int)i / 256);
+            disk_addresses[i] = c;
+            fprintf(ofDiskMemory, "0x%02X\t|%d\t\t|%c\n", i, (int)i / 256, disk_addresses[i]);
         }
     }
-    return disk_addresses;
 }
-void start_system(char *addresses, char *disk_addresses)
+void start_system(unsigned char *addresses, unsigned char *disk_addresses)
 {
     unsigned int offset_mask = 0x00FF;
 
@@ -156,20 +160,19 @@ void start_system(char *addresses, char *disk_addresses)
             //    reconstruct
             unsigned int phy_address = pfn << OFFSET_BITS;
             phy_address |= offset;
-            printf("phy_address %x\n", phy_address);
+            printf("The data store in the memory is %c\n", addresses[phy_address]);
         }
         else if (present_bit == 0x00 && pfn != '-')
         {
 
-            printf("DISK ADDRESS %X\n", pfn);
             //page fault exception
             printf("Page Fault exception!!\n");
             //swap
-            swap_empty(addresses, disk_addresses,pfn,vpn);
+            swap_empty(addresses, disk_addresses, pfn, vpn);
         }
         else if (pfn == '-')
         {
-            printf("There are nothing with this address\n");
+            printf("There are nothing in this address\n");
         }
         else
         {
@@ -178,17 +181,28 @@ void start_system(char *addresses, char *disk_addresses)
     }
 }
 
-void swap_replace(char *addresses, char *disk_addresses, unsigned char pfn ,unsigned char vpn)
+void swap_replace(unsigned char *addresses, unsigned char *disk_addresses, unsigned char pfn, unsigned char vpn)
 {
+    
+
 }
-void swap_empty(char *addresses, char *disk_addresses, unsigned char pfn ,unsigned char vpn )
+void swap_empty(unsigned char *addresses, unsigned char *disk_addresses, unsigned char pfn, unsigned char vpn)
 {
-    for(int i=512; i < PHYSICAL_MEMORY; i++){
-        if(addresses[i]=='-'){
-            for(int j=0; j < 256;j++){
-                addresses[i+j]=disk_addresses[pfn*256+j];
+    unsigned char new_pfn = '-';
+    bool done = false;
+    for (int i = 512; i < PHYSICAL_MEMORY && !done; i++)
+    {
+        if (addresses[i] == '-')
+        {
+            for (int j = 0; j < 256; j++)
+            {
+                addresses[i + j] = disk_addresses[pfn * 256 + j];
             }
-            i=i+256;
+            new_pfn = (int)i / 256;
+            i = PHYSICAL_MEMORY;
+            done = true;
         }
     }
+    addresses[vpn] = new_pfn;
+    addresses[vpn + 256] = 0x01;
 }
