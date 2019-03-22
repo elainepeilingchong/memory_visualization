@@ -13,14 +13,15 @@
 #define PHYSICAL_MEMORY 65536
 #define DISK_MEMORY 2048
 #define SYS_BITS 16
-// '-'
-#define INITIAL_VALUE 0x2D
+// NUL
+#define INITIAL_VALUE 0x00
 // #define nullptr ((void*)0)
 
 //FAULT
-#define PAGE_FAULT "Page Fault exception!!"
-#define PROTECTION_FAULT "Protection Fault exception!!"
-#define SEGMENTATION_FAULT "Segmentation Fault exception!!"
+#define PAGE_FAULT "Page Fault Exception!!"
+#define PROTECTION_FAULT "Protection Fault Exception!!"
+#define SEGMENTATION_FAULT "Segmentation Fault Exception!!"
+#define OUT_OF_BOUND_FAULT "Out of Bound Exception!!"
 
 
 //MASK

@@ -20,7 +20,7 @@ void set_up_physical_memory(unsigned char *addresses)
     printf("\tThe process is starting\n");
     print_seprator();
 
-    int no_of_frame = 0;
+    // int no_of_frame = 0;
     srand(time(NULL));
     int num = (rand() % (MAX_BYTES - MIN_BYTES)) + MIN_BYTES;
     int page_needed = (int)ceil((double)num / (double)PAGE_SIZE);
@@ -28,8 +28,8 @@ void set_up_physical_memory(unsigned char *addresses)
         page_needed -= 1;
     int first_frame_number = (rand() % (256 - page_needed - 2)) + 2;
     FILE *output_physical_memory, *output_page_table;
-    char physical_memory[] = "/Users/elainechong/Desktop/201819/Semester2/OP/CA1/memory_visualization/data/physical_memory.txt";
-    char page_table[] = "/Users/elainechong/Desktop/201819/Semester2/OP/CA1/memory_visualization/data/page_table.txt";
+    char physical_memory[] = "/Users/elainechong/Desktop/vboxsf/memory_visualization/data/physical_memory.txt";
+    char page_table[] = "/Users/elainechong/Desktop/vboxsf/memory_visualization/data/page_table.txt";
     output_physical_memory = fopen(physical_memory, "w");
     output_page_table = fopen(page_table, "w");
     fprintf(output_physical_memory, "Address\t|Frame\t|Content\t|Used\n");
@@ -39,25 +39,27 @@ void set_up_physical_memory(unsigned char *addresses)
     int increment_page_table_entry = 0;
     for (int i = 0; i < PHYSICAL_MEMORY; i++)
     {
-        if (i % PAGE_SIZE == 0 && i >= PAGE_SIZE)
-        {
-            no_of_frame++;
-        }
+        // if (i % PAGE_SIZE == 0 && i >= PAGE_SIZE)
+        // {
+        //     no_of_frame++;
+        // }
         if (i >= first_frame_number * PAGE_SIZE && i < (first_frame_number * PAGE_SIZE) + num)
         {
             char c = (rand() % (126 - 33)) + 33;
             addresses[i] = c;
             if (i % 256 == 0)
             {
+                int frame_number = (int)i/PAGE_SIZE;
+                
                 //0000 0001
                 unsigned char present_bit = 0x01;
                 //0000 0010
                 unsigned char valid_bit = 0x02;
-                addresses[increment_page_table_entry] = no_of_frame;
+                addresses[increment_page_table_entry] = frame_number;
 
                 //0000 0011
                 addresses[increment_page_table_entry + 256] = present_bit | valid_bit;
-                fprintf(output_page_table, "0x%02X\t|0x%02X\t\t\t|TRUE\t\t|TRUE\n", increment_page_table_entry, no_of_frame);
+                fprintf(output_page_table, "0x%02X\t|0x%02X\t\t\t|TRUE\t\t|TRUE\n", increment_page_table_entry, frame_number);
                 increment_page_table_entry++;
             }
         }
@@ -66,27 +68,24 @@ void set_up_physical_memory(unsigned char *addresses)
             addresses[i] = INITIAL_VALUE;
         }
     }
+
     for (int y = increment_page_table_entry; y < 256; y++)
     {
         addresses[y] = INITIAL_VALUE;
         fprintf(output_page_table, "0x%02X\t|-\t\t\t\t|FALSE\t\t|FALSE\n", y);
     }
-    no_of_frame = 0;
     for (int i = 0; i < PHYSICAL_MEMORY; i++)
     {
-        if (i % PAGE_SIZE == 0 && i >= PAGE_SIZE)
-        {
-            no_of_frame++;
-        }
+        int frame_number = (int)i/PAGE_SIZE;
         if (i < 512)
         {
             if (addresses[i] != INITIAL_VALUE)
             {
-                fprintf(output_physical_memory, "0x%04X\t|%03d\t|0x%04X\t\t|TRUE\n", i, no_of_frame, addresses[i]);
+                fprintf(output_physical_memory, "0x%04X\t|%03d\t|0x%04X\t\t|TRUE\n", i, frame_number, addresses[i]);
             }
             else
             {
-                fprintf(output_physical_memory, "0x%04X\t|%03d\t|-\t\t\t|-\n", i, no_of_frame);
+                fprintf(output_physical_memory, "0x%04X\t|%03d\t|-\t\t\t|FALSE\n", i, frame_number);
             }
             // printf("pfn %x", addresses[i]);
         }
@@ -94,11 +93,11 @@ void set_up_physical_memory(unsigned char *addresses)
         {
             if (addresses[i] == INITIAL_VALUE)
             {
-                fprintf(output_physical_memory, "0x%04X\t|%03d\t|-\t\t\t|FALSE\n", i, no_of_frame);
+                fprintf(output_physical_memory, "0x%04X\t|%03d\t|-\t\t\t|FALSE\n", i, frame_number);
             }
             else
             {
-                fprintf(output_physical_memory, "0x%04X\t|%03d\t|%c\t\t\t|TRUE\n", i, no_of_frame, addresses[i]);
+                fprintf(output_physical_memory, "0x%04X\t|%03d\t|%c\t\t\t|TRUE\n", i, frame_number, addresses[i]);
             }
         }
     }
@@ -106,7 +105,6 @@ void set_up_physical_memory(unsigned char *addresses)
     fclose(output_page_table);
     fclose(output_physical_memory);
     print_seprator();
-    printf("\tYour system is ready!\n");
     print_seprator();
 }
 void add_extra_entry(unsigned char *addresses)
@@ -133,25 +131,24 @@ void add_extra_entry(unsigned char *addresses)
 }
 void set_up_disk_memory(unsigned char *disk_addresses)
 {
+    printf("SET UP DISK % d\n",DISK_MEMORY);
     FILE *output_disk_memory;
-    char disk_memory[] = "/Users/elainechong/Desktop/201819/Semester2/OP/CA1/memory_visualization/data/disk_memory.txt";
+    char disk_memory[] = "/Users/elainechong/Desktop/vboxsf/memory_visualization/data/disk_memory.txt";
     output_disk_memory = fopen(disk_memory, "w");
-    fprintf(output_disk_memory, "Address\t|Frame\t|Content\t|Used\n");
-    fprintf(output_disk_memory, "--------------------------------\n");
+    fprintf(output_disk_memory, "Address\t|Frame\t|Content\t\t|Used\n");
+    fprintf(output_disk_memory, "-------------------------------------\n");
     for (int i = 0; i < DISK_MEMORY; i++)
     {
         if (i < 512)
         {
-
             char c = (rand() % (126 - 33)) + 33;
-
             disk_addresses[i] = c;
-            fprintf(output_disk_memory, "0x%02X\t|%d\t\t|%c\t\t\t|TRUE\n", i, (int)i / 256, disk_addresses[i]);
+            fprintf(output_disk_memory, "0x%02X\t|%d\t\t|%c\t\t\t\t|TRUE\n", i, (int)i / 256, disk_addresses[i]);
         }
         else
         {
             disk_addresses[i] = INITIAL_VALUE;
-            fprintf(output_disk_memory, "0x%02X\t|%d\t\t|%c\t\t\t|FALSE\n", i, (int)i / 256, disk_addresses[i]);
+            fprintf(output_disk_memory, "0x%02X\t|%d\t\t|0x%02x\t\t\t|FALSE\n", i, (int)i / 256, disk_addresses[i]);
         }
     }
 }
@@ -170,8 +167,8 @@ void start_system(unsigned char *addresses, unsigned char *disk_addresses, struc
 
         if (user_input_address > PHYSICAL_MEMORY)
         {
-            raise_exception("OUT OF BOUND FAULT");
-            raise_exception("Terminating the process");
+            raise_exception(OUT_OF_BOUND_FAULT);
+            printf("\tTerminating the process\n");
             sleep(2);
             exit(0);
         }
@@ -197,9 +194,9 @@ void start_system(unsigned char *addresses, unsigned char *disk_addresses, struc
             unsigned char pfn = addresses[vpn];
             unsigned int other_bits = addresses[vpn + PAGE_SIZE];
             unsigned int present_bit = other_bits & PRESENT_BIT_MASK;
-            //000 0001 or 000 0001
+            //000 0001 or 000 0000
             unsigned int valid_bit = other_bits >> VALID_BIT_SHIFT;
-            //    reconstruct
+            // reconstruct
             unsigned int phy_address = pfn << ADDRESS_SHIFT;
             phy_address |= offset;
             if (valid_bit == FALSE_BIT)
@@ -210,7 +207,6 @@ void start_system(unsigned char *addresses, unsigned char *disk_addresses, struc
             {
                 if (present_bit == TRUE_BIT)
                 {
-
                     printf("\tUpdating TLB\n");
                     char str2[10];
                     sprintf(str2, "%d", pfn);
