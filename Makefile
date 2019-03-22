@@ -3,12 +3,12 @@ CC      = gcc
 CFLAGS  = -c -Wall
 LIBDIR  = lib
 BINDIR  = dist
-OBJECTS = dist dist/main.o dist/functions.o
+OBJECTS = dist/main.o dist/functions.o
 
 default: link
 
 link: $(OBJECTS)
-	$(CC) $? -o $(BINDIR)/simulate
+	$(CC) $? -o $(BINDIR)/stimulate
 
 $(BINDIR)/main.o: main.c
 	$(CC) $(CFLAGS) main.c -o $(BINDIR)/main.o
