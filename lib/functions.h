@@ -55,6 +55,6 @@ void add_extra_entry(unsigned char *addresses);
 // void swap_replace(unsigned char *addresses, unsigned char *disk_addresses, unsigned char pfn, unsigned char vpn);
 void swap_empty(unsigned char *addresses, unsigned char *disk_addresses, unsigned char pfn, unsigned char vpn);
 void raise_exception(char *fault);
-void print_seprator();
+void print_separator();
 
 #endif

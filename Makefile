@@ -3,7 +3,8 @@ CC      = gcc
 CFLAGS  = -c -Wall
 LIBDIR  = lib
 BINDIR  = dist
-OBJECTS = dist/main.o dist/functions.o
+OBJECTS = $(BINDIR)/main.o\
+										$(BINDIR)/functions.o
 
 default: link
 

@@ -9,7 +9,6 @@ int main()
 	struct map_t *tlb;
 	tlb = map_create();
 	set_up_physical_memory(addresses);
-	printf("%c\n", disk_addresses[0]);
 	set_up_disk_memory(disk_addresses);
 	add_extra_entry(addresses);
 	start_system(addresses, disk_addresses, tlb);
