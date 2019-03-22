@@ -180,10 +180,12 @@ void start_system(unsigned char *addresses, unsigned char *disk_addresses, struc
             sleep(2);
             exit(0);
         }
-        // convert number to string []
+        // convert number to string
+        //https://stackoverflow.com/questions/8257714/how-to-convert-an-int-to-string-in-c
         int length = snprintf(NULL, 0, "%d", 2);
         char *str = malloc(length + 1);
         snprintf(str, length + 1, "%d", vpn);
+        //CONCEPT IDEA FROM http://pages.cs.wisc.edu/~remzi/OSTEP/vm-tlbs.pdf
         //if the return of tlb has value
         if (map_get(tlb, str) != "")
         {
@@ -199,6 +201,8 @@ void start_system(unsigned char *addresses, unsigned char *disk_addresses, struc
         else
         {
             raise_exception("\tTLB Miss");
+            //CODE IDEA FROM MOODLE
+            //https://2019-moodle.dkit.ie/pluginfile.php/567340/mod_resource/content/2/32bit-address-parts.c
             unsigned char pfn = addresses[vpn];
             unsigned int other_bits = addresses[vpn + PAGE_SIZE];
             unsigned int present_bit = other_bits & PRESENT_BIT_MASK;
@@ -273,6 +277,33 @@ void swap_empty(unsigned char *addresses, unsigned char *disk_addresses, unsigne
     addresses[vpn + 256] = 0x03;
 }
 
+void raise_exception(char *fault)
+{
+    print_separator();
+    printf("\n");
+    printf("\t%s\n", fault);
+    printf("\n");
+    print_separator();
+}
+
+
+// A simple associative-array library for C
+//
+// License: MIT / X11
+// Copyright (c) 2009, 2012, 2018 by James K. Lawless
+// jimbo@radiks.net
+// https://jiml.us
+//
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation
+// files (the "Software"), to deal in the Software without
+// restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following
+// conditions:
+
+//https://github.com/jimlawless/map_lib
 struct map_t *map_create()
 {
     struct map_t *m;
@@ -336,11 +367,3 @@ char *map_get(struct map_t *m, char *name)
     return "";
 }
 
-void raise_exception(char *fault)
-{
-    print_separator();
-    printf("\n");
-    printf("\t%s\n", fault);
-    printf("\n");
-    print_separator();
-}

@@ -1,4 +1,6 @@
 #The code below is taken from moodle 
+#Operating System module: Make Files (Makefile):Resource: Makefile Version 2 (Variables)
+#https://2019-moodle.dkit.ie/course/view.php?id=8732
 CC      = gcc
 CFLAGS  = -c -Wall
 LIBDIR  = lib
