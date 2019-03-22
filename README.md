@@ -1,15 +1,16 @@
-#Memory Visualization
+# Memory Visualization
 
 This is a project for the Operating System Module which helps the student to visualize the memory management in operating system.
 
 This project will perform address translation and use translation-lookaside buffer for faster translation. It will handle the exception (Page fault) when the memory is saved in disk. 
 
-#Getting Started
+# Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. 
 
-##Prerequisites
+## Prerequisites
 [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or any other virtual machines.
+<br /> 
 [Ubuntu 18.04.](https://www.ubuntu.com/download/desktop/thank-you?country=IE&version=18.04.2&architecture=amd64)
 
 <!-- 
@@ -28,23 +29,23 @@ And repeat
 until finished
 End with an example of getting some data out of the system or using it for a little demo
 
-#Running the tests
+# Running the tests
 
 Explain how to run the automated tests for this system
 
-##Break down into end to end tests
+## Break down into end to end tests
 
 Explain what these tests test and why
 
 Give an example
-##And coding style tests
+## And coding style tests
 
 Explain what these tests test and why
 
 Give an example
 
 
-#Built With
+# Built With
 
 Dropwizard - The web framework used
 Maven - Dependency Management
@@ -52,7 +53,7 @@ ROME - Used to generate RSS Feeds
 Contributing -->
 
 
-#Deployment
+# Deployment
 To compile the project, run
 ```bash
 make
@@ -62,12 +63,13 @@ To start the project, run
 ./dist/stimulate
 ```
 
-#Authors
+# Authors
 
 Elaine Pei Ling Chong
 
 
-#Acknowledgments
+# Acknowledgments
 
 [Mechanism: Address Translation](http://pages.cs.wisc.edu/~remzi/OSTEP/vm-mechanism.pdf)
+<br /> 
 [Paging: Faster Translations (TLBs)](http://pages.cs.wisc.edu/~remzi/OSTEP/vm-tlbs.pdf)
