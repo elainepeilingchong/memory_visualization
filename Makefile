@@ -1,16 +1,21 @@
+#The code below is taken from moodle 
+CC      = gcc
+CFLAGS  = -c -Wall
+LIBDIR  = lib
+BINDIR  = dist
+OBJECTS = dist dist/main.o dist/functions.o
+
 default: link
 
-link:dist dist/main.o dist/map_lib.o dist/functions.o
-	gcc dist/main.o dist/functions.o -o dist/main 
+link: $(OBJECTS)
+	$(CC) $? -o $(BINDIR)/simulate
 
-dist/main.o: main.c
-	gcc -c -Wall main.c -o dist/main.o
-	
-dist/functions.o: lib/functions.c
-	gcc -c -Wall lib/functions.c -o dist/functions.o
+$(BINDIR)/main.o: main.c
+	$(CC) $(CFLAGS) main.c -o $(BINDIR)/main.o
 
-dist/map_lib.o: lib/map_lib.c
-	gcc -c -Wall lib/map_lib.c -o dist/map_lib.o
+$(BINDIR)/functions.o: $(LIBDIR)/functions.c
+	$(CC) $(CFLAGS) $(LIBDIR)/functions.c -o $(BINDIR)/functions.o
 
 clean:
-	rm -rf ./dist && mkdir ./dist
+	rm -rf ./$(BINDIR) && mkdir $(BINDIR)
+

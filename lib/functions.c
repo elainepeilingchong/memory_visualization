@@ -45,9 +45,7 @@ void set_up_physical_memory(unsigned char *addresses)
         }
         if (i >= first_frame_number * PAGE_SIZE && i < (first_frame_number * PAGE_SIZE) + num)
         {
-
             char c = (rand() % (126 - 33)) + 33;
-
             addresses[i] = c;
             if (i % 256 == 0)
             {
@@ -198,15 +196,12 @@ void start_system(unsigned char *addresses, unsigned char *disk_addresses, struc
             raise_exception("\tTLB Miss");
             unsigned char pfn = addresses[vpn];
             unsigned int other_bits = addresses[vpn + PAGE_SIZE];
-
             unsigned int present_bit = other_bits & PRESENT_BIT_MASK;
-
             //000 0001 or 000 0001
             unsigned int valid_bit = other_bits >> VALID_BIT_SHIFT;
             //    reconstruct
             unsigned int phy_address = pfn << ADDRESS_SHIFT;
             phy_address |= offset;
-
             if (valid_bit == FALSE_BIT)
             {
                 raise_exception(SEGMENTATION_FAULT);
